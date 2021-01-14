@@ -1,80 +1,62 @@
 package org.jembi.challenge;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.sql.*;
-import java.util.Scanner;
+import java.net.MalformedURLException;
+import java.sql.SQLException;
+import java.util.Collection;
 
+import org.jembi.challenge.utils.FileReader;
+
+import org.jembi.challenge.model.Patient;
+import org.jembi.challenge.service.PatientService;
+import org.jembi.challenge.service.PatientServiceImpl;
+
+/**
+ * 
+ * Class that has the main point of the App and Responsible for running the App
+ * 
+ * @author José Julai Ritsure
+ * 
+ */
 public class Main {
 
-  public static void main(String[] args) throws IOException, SQLException {
-    URL url = new URL("https://www.mockaroo.com/04de5930/download?count=1000&key=e27814e0");
-    Scanner input = new Scanner(new BufferedReader(new InputStreamReader(url.openStream())));
+	public static void main(String[] args) throws IOException, SQLException {
 
-    Connection db = DriverManager.getConnection("jdbc:sqlite::memory:");
-    Statement statement = db.createStatement();
-    statement.executeUpdate(
-        "create table if not exists patients (id primary key, identityNumber string, " +
-            "firstName string, lastName string, phoneNumber string, address string, gender string, race string)");
+		final String url = "https://www.mockaroo.com/04de5930/download?count=1000&key=e27814e0";
 
-    while (input.hasNextLine()) {
-      String line = input.nextLine();
-      line = line.replace("[", "");
-      line = line.replace("]", "");
-      line = line.replace("{", "");
-      line = line.replace("}", "");
-      line = line.replace("\"", "");
+		FileReader fileReader = null;
 
-      String[] fields = line.split(",");
+		try {
+			fileReader = new FileReader(url);
+		} catch (MalformedURLException e) {
+			// Should treat this exception
+			e.printStackTrace();
+		}
 
-      for (int i = 0; i < fields.length; i++) {
-        fields[i] = fields[i].substring(fields[i].indexOf(":") + 1);
-      }
+		PatientService patientService = new PatientServiceImpl();
+		try {
+			Collection<Patient> patients = fileReader.getPatientRecords();
+			Collection<Patient> registeredPatients = patientService
+					.registerPatients(patients);
 
-      String insert =
-          "insert into patients(identityNumber, firstName, lastName, phoneNumber, address, gender, race) "
-              +
-              "values(\"" + fields[0] + "\", \"" + fields[1] + "\", \"" + fields[2] + "\", \"" +
-              fields[3] + "\", \"" + fields[4] + "\", \"" + fields[5] + "\", \"" + fields[6]
-              + "\")";
+			System.out.println("Registered Patients: "
+					+ registeredPatients.size());
+			System.out
+					.println("---------------------------------------------------------------------------------------------------------");
+			for (Patient patient : registeredPatients) {
+				System.out.println(patient.getIdentityNumber() + ", "
+						+ patient.getFirstName() + ", " + patient.getLastName()
+						+ ", " + patient.getPhoneNumber() + ", "
+						+ patient.getAddress() + ", " + patient.getGender()
+						+ ", " + patient.getRace());
+			}
+			System.out
+					.println("---------------------------------------------------------------------------------------------------------");
 
-      ResultSet duplicates = statement.executeQuery("select * from patients " +
-          "where identityNumber =" + fields[0] + " or " +
-          "(firstName = \"" + fields[1] + "\" and lastName =\"" + fields[2] + "\")");
+		} catch (Exception e) {
+			// Should treat this exception
+			e.printStackTrace();
+		}
 
-      if (duplicates.isBeforeFirst()) {
-        while (duplicates.next()) {
-          if (fields[0] == duplicates.getString("identityNumber")) {
-            continue;
-          } else if (fields[1] == duplicates.getString("firstName") && fields[2] == duplicates
-              .getString("lastName")) {
-            if (fields[5] == duplicates.getString("gender") && fields[6] == duplicates
-                .getString("race")) {
-              continue;
-            }
-          } else {
-            statement.executeUpdate(insert);
-          }
-        }
-      } else {
-        statement.executeUpdate(insert);
-      }
-    }
-
-    ResultSet count = statement.executeQuery("select count(*) as count from patients");
-    System.out.println(count.getInt("count"));
-
-    ResultSet rows = statement.executeQuery("select * from patients limit 10");
-    while (rows.next()) {
-      System.out.println(rows.getString("identityNumber") + ", " +
-          rows.getString("firstName") + ", " +
-          rows.getString("lastName") + ", " +
-          rows.getString("phoneNumber") + ", " +
-          rows.getString("address") + ", " +
-          rows.getString("gender") + ", " +
-          rows.getString("race"));
-    }
-  }
+	}
 }
