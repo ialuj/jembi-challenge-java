@@ -30,9 +30,8 @@ public class PaientServiceTest {
 		try {			
 			URL resource = PaientServiceTest.class
 		            .getResource("/patients.json");
-			String url = resource.getFile().replace("file:/", "file:///");
-			fileReader = new FileReader("file://"+url);
-			//fileReader = new FileReader("file:///C:/Users/Acer/git/challenge-java/src/test/resources/patients.json");
+			String url = "file://"+resource.getFile();
+			fileReader = new FileReader(url);
 		} catch (MalformedURLException e) {
 			Assert.fail();
 		}
