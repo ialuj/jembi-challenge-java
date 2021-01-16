@@ -16,5 +16,31 @@ repositories {
 }
 
 dependencies {
-  runtime "org.xerial:sqlite-jdbc:3.23.1"
+  runtime ('org.xerial:sqlite-jdbc:3.23.1')
+  testImplementation(
+            'junit:junit:4.12',
+            'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    )
+  testRuntime(
+            'org.junit.jupiter:junit-jupiter-engine:5.4.2',
+            'org.junit.vintage:junit-vintage-engine:5.4.2'
+    )
+  testCompile("junit:junit")
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+    events "passed", "skipped", "failed", "standardOut", "standardError"
+  }
+    dependsOn 'cleanTest'
+}
+
+sourceSets {
+  test {
+    java {
+      srcDir 'src'
+      srcDir 'test'
+    }
+  }
 }

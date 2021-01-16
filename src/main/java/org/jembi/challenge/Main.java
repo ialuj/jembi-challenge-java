@@ -2,14 +2,14 @@ package org.jembi.challenge;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.Collection;
-
-import org.jembi.challenge.utils.FileReader;
 
 import org.jembi.challenge.model.Patient;
 import org.jembi.challenge.service.PatientService;
 import org.jembi.challenge.service.PatientServiceImpl;
+import org.jembi.challenge.utils.FileReader;
 
 /**
  * 
@@ -25,6 +25,8 @@ public class Main {
 		final String url = "https://www.mockaroo.com/04de5930/download?count=1000&key=e27814e0";
 
 		FileReader fileReader = null;
+		
+		Main main = new Main();
 
 		try {
 			fileReader = new FileReader(url);
