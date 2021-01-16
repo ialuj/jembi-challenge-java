@@ -16,34 +16,35 @@ import org.junit.jupiter.api.Test;
  * Class that is responsible for Patient Service Tests
  * 
  * @author José Julai Ritsure
- *
+ * 
  */
 public class PaientServiceTest {
-	
+
 	private PatientService patientService = new PatientServiceImpl();
-	
+
 	private FileReader fileReader;
-	
+
 	@Test
 	public void shouldRegisterPatients() {
-      
-		try {			
+
+		try {
 			URL resource = PaientServiceTest.class
-		            .getResource("/patients.json");
-			String url = "file://"+resource.getFile();
+					.getResource("/patients.json");
+			String url = "file://" + resource.getFile();
 			fileReader = new FileReader(url);
 		} catch (MalformedURLException e) {
 			Assert.fail();
 		}
-		
+
 		Collection<Patient> patients = fileReader.getPatientRecords();
 		Assert.assertTrue(!patients.isEmpty());
 		Assert.assertEquals(11, patients.size());
-		
-		Collection<Patient> savedPatients = patientService.registerPatients(patients);
+
+		Collection<Patient> savedPatients = patientService
+				.registerPatients(patients);
 		Assert.assertTrue(!savedPatients.isEmpty());
 		Assert.assertEquals(9, savedPatients.size());
-		
+
 	}
 
 }
